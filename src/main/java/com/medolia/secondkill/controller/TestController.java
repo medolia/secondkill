@@ -13,13 +13,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping("/demo")
-public class BaseController {
+public class TestController {
 
     UserService userService;
     RedisService redisService;
 
     @Autowired
-    public BaseController(UserService userService, RedisService redisService) {
+    public TestController(UserService userService, RedisService redisService) {
         this.userService = userService;
         this.redisService = redisService;
     }

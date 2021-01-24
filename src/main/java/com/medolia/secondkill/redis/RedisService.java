@@ -14,7 +14,7 @@ public class RedisService {
     JedisPool jedisPool;
 
     /**
-     * 设置值
+     * 获取值
      */
     public <T> T get(KeyPrefix prefix, String key, Class<T> clazz) {
         Jedis jedis = null;
@@ -31,7 +31,7 @@ public class RedisService {
     }
 
     /**
-     * 获取值
+     * 设置值
      */
     public <T> boolean set(KeyPrefix prefix, String key, T value) {
         Jedis jedis = null;

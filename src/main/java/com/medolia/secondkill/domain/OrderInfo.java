@@ -17,8 +17,8 @@ public class OrderInfo {
     private String goodsName;
     private Integer goodsCount;
     private Double goodsPrice;
-    private Integer orderChannel;
-    private Integer status;
+    private Integer orderChannel; // 订单渠道
+    private Integer status; // 订单状态
     private Date createDate;
     private Date payDate;
 }
