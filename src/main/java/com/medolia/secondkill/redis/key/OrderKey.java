@@ -1,17 +1,9 @@
 package com.medolia.secondkill.redis.key;
 
 public class OrderKey extends BaseKeyPrefix {
-    public OrderKey(int expireSeconds, String prefix) {
-        super(expireSeconds, prefix);
+    public OrderKey(String prefix) {
+        super(prefix);
     }
 
-    @Override
-    public int expireSeconds() {
-        return super.expireSeconds();
-    }
-
-    @Override
-    public String getPrefix() {
-        return super.getPrefix();
-    }
+    public static OrderKey getSeckillOrderByUidGid = new OrderKey("moug");
 }

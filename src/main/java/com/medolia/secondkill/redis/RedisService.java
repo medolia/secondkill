@@ -1,11 +1,18 @@
 package com.medolia.secondkill.redis;
 
 import com.alibaba.fastjson.JSON;
+import com.medolia.secondkill.rabbitmq.SeckillMsg;
 import com.medolia.secondkill.redis.key.KeyPrefix;
+import com.medolia.secondkill.redis.key.SeckillUserKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.ScanParams;
+import redis.clients.jedis.ScanResult;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class RedisService {
@@ -67,6 +74,65 @@ public class RedisService {
     }
 
     /**
+     * 删除单个 key
+     */
+    public boolean delete(KeyPrefix prefix, String key) {
+        Jedis jedis = null;
+        try {
+            jedis = jedisPool.getResource();
+            String realKey = prefix.getPrefix() + key;
+            long ret = jedis.del(realKey);
+            return ret > 0;
+        } finally {
+            returnToPool(jedis);
+        }
+    }
+
+    /**
+     * 根据前缀批量删除 key
+     */
+    public boolean delete(KeyPrefix prefix) {
+        if (prefix == null) return false;
+        List<String> keys = scanKeys(prefix.getPrefix());
+        if (keys == null || keys.size() <= 0)
+            return true;
+
+        Jedis jedis = null;
+        try {
+            jedis = jedisPool.getResource();
+            jedis.del(keys.toArray(new String[0]));
+            return true;
+        } catch (final Exception e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            returnToPool(jedis);
+        }
+    }
+
+    public List<String> scanKeys(String key) {
+        Jedis jedis = null;
+        try {
+            jedis = jedisPool.getResource();
+            List<String> keys = new ArrayList<>();
+            String cursor = "0";
+            ScanParams sp = new ScanParams();
+            sp.match("*"+key+"*");
+            sp.count(100);
+            do {
+                ScanResult<String> ret = jedis.scan(cursor, sp);
+                List<String> result = ret.getResult();
+                if (result != null && result.size() > 0)
+                    keys.addAll(result);
+                cursor = ret.getCursor();
+            } while (!cursor.equals("0")); // 即未遍历完一次
+            return keys;
+        } finally {
+            returnToPool(jedis);
+        }
+    }
+
+    /**
      * 增加值
      */
     public <T> Long incr(KeyPrefix prefix, String key) {
@@ -103,7 +169,7 @@ public class RedisService {
      * 3. 对于字符串，原样返回
      * 4. 其他情况，返回 JSON 化的 value
      */
-    private <T> String beanToString(T value) {
+    public static <T> String beanToString(T value) {
         if (value == null) return null;
 
         Class<?> clazz = value.getClass();
@@ -114,15 +180,17 @@ public class RedisService {
     }
 
     @SuppressWarnings("unchecked")
-    private <T> T stringToBean(String str, Class<T> clazz) {
+    public static <T> T stringToBean(String str, Class<T> clazz) {
         if (str == null || str.length() <= 0 || clazz == null)
             return null;
 
         if (clazz == int.class || clazz == Integer.class)
             return (T) Integer.valueOf(str);
-
         else if (clazz == long.class || clazz == Long.class)
             return (T) Long.valueOf(str);
+        // 须返回 String 格式的 html 页面
+        else if (clazz == String.class)
+            return (T) str;
         else
             return JSON.toJavaObject(JSON.parseObject(str), clazz);
     }
@@ -131,4 +199,9 @@ public class RedisService {
         if (jedis != null)
             jedis.close();
     }
+
+    /*public static void main(String[] args) {
+        String json = "{\"goodsId\":1,\"user\":{\"id\":18912341241,\"loginCount\":0,\"nickname\":\"18612766141\",\"password\":\"b7797cce01b4b131b433b6acf4add449\",\"registerDate\":1547228183000,\"salt\":\"1a2b3c4d\"}}";
+        SeckillMsg msg = JSON.toJavaObject(JSON.parseObject(json), SeckillMsg.class);
+    }*/
 }

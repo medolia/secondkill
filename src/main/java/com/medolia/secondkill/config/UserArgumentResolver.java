@@ -53,6 +53,7 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
     // 扫描请求的所有 cookie，找到规定键值的那个
     private String getCookieValue(HttpServletRequest request, String cookieNameToken) {
         Cookie[] cookies = request.getCookies();
+        if (cookies == null || cookies.length <= 0) return null;
         for (Cookie cookie : cookies) {
             if (cookie.getName().equals(cookieNameToken))
                 return cookie.getValue();

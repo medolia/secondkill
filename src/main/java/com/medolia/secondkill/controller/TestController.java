@@ -1,34 +1,48 @@
 package com.medolia.secondkill.controller;
 
+import com.medolia.secondkill.domain.SeckillUser;
 import com.medolia.secondkill.domain.User;
+import com.medolia.secondkill.rabbitmq.MQSender;
 import com.medolia.secondkill.redis.RedisService;
 import com.medolia.secondkill.redis.key.UserKey;
 import com.medolia.secondkill.result.CodeMsg;
 import com.medolia.secondkill.result.Result;
-import com.medolia.secondkill.service.UserService;
+import com.medolia.secondkill.service.SeckillUserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+@Slf4j
 @Controller
 @RequestMapping("/demo")
 public class TestController {
 
-    UserService userService;
+    SeckillUserService userService;
     RedisService redisService;
+    MQSender sender;
 
     @Autowired
-    public TestController(UserService userService, RedisService redisService) {
+    public TestController(SeckillUserService userService, RedisService redisService, MQSender sender) {
         this.userService = userService;
         this.redisService = redisService;
+        this.sender = sender;
+    }
+
+    @RequestMapping("/mq")
+    @ResponseBody
+    public Result<String> mq() {
+        log.info("msg sent: test msg.");
+        sender.sendTestMsg("test msg");
+        return Result.success("msg sent!");
     }
 
     @RequestMapping("/db/get")
     @ResponseBody
     public Result<String> getUser() {
-        User user = userService.getById(1);
-        return Result.success(user.getName());
+        SeckillUser user = userService.getById(1);
+        return Result.success(user.getNickname());
     }
 
     @RequestMapping("/hello")

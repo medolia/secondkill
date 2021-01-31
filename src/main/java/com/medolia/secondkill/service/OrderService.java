@@ -26,6 +26,10 @@ public class OrderService {
         return orderDao.getSeckillOrderByUserIdGoodsId(userId, goodsId);
     }
 
+    public OrderInfo getOrderById(long orderId) {
+        return orderDao.getOrderById(orderId);
+    }
+
     @Transactional // 由 SeckillService 的事务方法调用，事务传播使其加入当前事务
     public OrderInfo createOrder(SeckillUser user, GoodsVo goods) {
         OrderInfo orderInfo = new OrderInfo();
@@ -45,5 +49,10 @@ public class OrderService {
         seckillOrder.setOrderId(orderInfo.getId());
         orderDao.insertSeckillOrder(seckillOrder);
         return orderInfo;
+    }
+
+    public void deleteOrders() {
+        orderDao.deleteOrders();
+        orderDao.deleteSeckillOrders();
     }
 }

@@ -8,8 +8,12 @@ import redis.clients.jedis.JedisPoolConfig;
 
 @Service
 public class RedisPoolFactory {
-    @Autowired
     RedisConfig redisConfig;
+
+    @Autowired
+    public void setRedisConfig(RedisConfig redisConfig) {
+        this.redisConfig = redisConfig;
+    }
 
     @Bean // 注意微秒到秒的换算，数据库最大支持 16 个库，0 代表首个库
     public JedisPool JedisPoolFactory() {

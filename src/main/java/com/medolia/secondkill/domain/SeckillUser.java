@@ -13,14 +13,14 @@ public class SeckillUser {
     private Long id;
     private String nickname;
     private String password;
-    private String salt; // MD 5 第二次明文使用的 SALT
+    private String salt; //  第二次 MD 5 使用的 SALT
     private String head;
     private Date registerDate;
     private Date lastLoginDate;
     private Integer loginCount;
     @Override
     public String toString() {
-        return "Logininfo{" +
+        return "LoginInfo{" +
                 "id=" + id +
                 ", nickname='" + nickname + '\'' +
                 ", password='" + password + '\'' +

@@ -12,6 +12,7 @@ import java.util.List;
 @Mapper
 public interface GoodsDao {
 
+    // 使用联合查询得到秒杀订单
     @Select("select g.*,sg.stock_count, sg.start_date, sg.end_date,sg.seckill_price from seckill_goods sg left join goods g on sg.goods_id = g.id")
     public List<GoodsVo> listGoodsVo();
 
