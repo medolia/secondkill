@@ -1,5 +1,6 @@
 package com.medolia.secondkill.config;
 
+import com.medolia.secondkill.access.UserContext;
 import com.medolia.secondkill.domain.SeckillUser;
 import com.medolia.secondkill.service.SeckillUserService;
 import org.apache.commons.lang3.StringUtils;
@@ -34,30 +35,11 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
         return clazz==SeckillUser.class;
     }
 
-    @Override // 读取 token 值
+    @Override
     public Object resolveArgument(MethodParameter methodParameter, ModelAndViewContainer modelAndViewContainer,
           NativeWebRequest nativeWebRequest, WebDataBinderFactory webDataBinderFactory) throws Exception {
-        HttpServletRequest request = nativeWebRequest.getNativeRequest(HttpServletRequest.class);
-        HttpServletResponse response = nativeWebRequest.getNativeResponse(HttpServletResponse.class);
-
-        // 变量既可能在请求 uri 上，也可能在 cookie 中
-        String paramToken = request.getParameter(SeckillUserService.COOKIE_NAME_TOKEN);
-        String cookieToken = getCookieValue(request, SeckillUserService.COOKIE_NAME_TOKEN);
-        if (StringUtils.isEmpty(cookieToken) && StringUtils.isEmpty(paramToken))
-            return null;
-
-        String token = StringUtils.isEmpty(paramToken) ? cookieToken : paramToken;
-        return userService.getByToken(response, token);
+        // 返回线程局部变量中的 user
+        return UserContext.getUser();
     }
 
-    // 扫描请求的所有 cookie，找到规定键值的那个
-    private String getCookieValue(HttpServletRequest request, String cookieNameToken) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies == null || cookies.length <= 0) return null;
-        for (Cookie cookie : cookies) {
-            if (cookie.getName().equals(cookieNameToken))
-                return cookie.getValue();
-        }
-        return null;
-    }
 }

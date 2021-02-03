@@ -51,7 +51,8 @@ public class SeckillUserService {
 
         // 若缓存未命中，查询数据库、更新缓存
         user = seckillUserDao.getById(id);
-        if (user != null) redisService.set(SeckillUserKey.getById, ""+id, user);
+        if (user != null)
+            redisService.set(SeckillUserKey.getById, ""+id, user);
 
         return user;
     }

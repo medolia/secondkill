@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.medolia</groupId>
     <artifactId>secondkill</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
     <name>secondkill</name>
     <description>secondkill system supported by Spring Boot</description>
 
@@ -29,7 +29,7 @@
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
 
-        <!--    开发环境辅助    -->
+        <!--    开发辅助    -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -75,6 +75,7 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
+        <!--    消息队列    -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-amqp</artifactId>

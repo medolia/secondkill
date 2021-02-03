@@ -5,5 +5,5 @@ public class OrderKey extends BaseKeyPrefix {
         super(prefix);
     }
 
-    public static OrderKey getSeckillOrderByUidGid = new OrderKey("moug");
+    public static OrderKey getSeckillOrderByUidGid = new OrderKey("soug");
 }

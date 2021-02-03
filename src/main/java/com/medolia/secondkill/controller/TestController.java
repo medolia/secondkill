@@ -11,6 +11,7 @@ import com.medolia.secondkill.service.SeckillUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -28,6 +29,13 @@ public class TestController {
         this.userService = userService;
         this.redisService = redisService;
         this.sender = sender;
+    }
+
+    @RequestMapping("/model")
+    @ResponseBody
+    public Result<Boolean> model(Model model) {
+        model.addAttribute("greeting", "hello");
+        return Result.success(true);
     }
 
     @RequestMapping("/mq")

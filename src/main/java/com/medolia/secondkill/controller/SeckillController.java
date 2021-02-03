@@ -1,5 +1,6 @@
 package com.medolia.secondkill.controller;
 
+import com.medolia.secondkill.access.AccessLimit;
 import com.medolia.secondkill.domain.SeckillOrder;
 import com.medolia.secondkill.domain.SeckillUser;
 import com.medolia.secondkill.rabbitmq.MQSender;
@@ -20,11 +21,12 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
+import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletResponse;
+import java.awt.image.BufferedImage;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 
@@ -71,17 +73,46 @@ public class SeckillController implements InitializingBean {
     }
 
     /**
-     * 秒杀逻辑（入队前）解释
-     * 1. user 为 null ？ yes：返回会话期过时或需要登录的错误信息 no：跳转至 2
-     * 2. 内存标记（map 对象）表明商品是否秒杀结束 ？ yes：返回秒杀结束的错误信息 no：跳转至 3
-     * 3. 预减库存（redis 更新值）是否失败 ？ yes：更新对应商品的内存标记，返回秒杀结束的错误信息 no：跳转值 4
-     * 4. 数据库判断是否重复下单 ？ yes：返回重复秒杀的错误信息 no：跳转至 5
-     * 5. 将消息发送（direct exchange）至 id 为 "SECKILL_QUEUE" 的消息队列，返回秒杀等待中的成功信息
+     * 生成 path 值需要正确回答验证码问题
      */
-    @RequestMapping(value = "/do_seckill", method = RequestMethod.POST)
+    @RequestMapping(value = "/path", method = RequestMethod.GET)
     @ResponseBody
-    public Result<CodeMsg> seckill(SeckillUser user, @RequestParam("goodsId") long goodsId) {
+    @AccessLimit(seconds = 5, maxCount = 5, needLogin = true)
+    public Result<String> getSeckillPath(SeckillUser user, @RequestParam("goodsId") long goodsId,
+                                         @RequestParam("verifyCode") int verifyCode) {
+        if (user == null)
+            return Result.error(CodeMsg.SESSION_ERROR);
+
+        boolean check = seckillService.checkVerifyCode(user, goodsId, verifyCode);
+        if (!check)
+            return Result.error(CodeMsg.SECKILL_VERIFY_FAIL);
+
+        String path = seckillService.createSeckillPath(user, goodsId);
+        return Result.success(path);
+    }
+
+    /**
+     * 秒杀逻辑（入队前）解释
+     * 1. user 已登录，否则返回 会话期过时
+     * 2. path 值核对为真，否则返回 请求非法
+     * 2. 内存标记（map 对象）表明商品仍在秒杀，否则返回 秒杀结束
+     * 3. 预减库存（redis 更新值）成功 否则更新对应商品的内存标记，返回 秒杀结束
+     * 4. 数据库判断未重复下单 否则返回 重复秒杀
+     * 5. 将消息发送（direct exchange）至 id 为 "SECKILL_QUEUE" 的消息队列 queue，返回 秒杀等待中
+     */
+    @RequestMapping(value = "/{path}/do_seckill", method = RequestMethod.POST)
+    @ResponseBody
+    public Result<CodeMsg> seckill(SeckillUser user, @RequestParam("goodsId") long goodsId,
+                                   @PathVariable("path") String path) {
+
+        // 用户登录验证
         if (user == null) return Result.error(CodeMsg.SESSION_ERROR);
+
+        // path 验证
+        log.info("path: " + path);
+        boolean check = seckillService.checkPath(user, goodsId, path);
+        if (!check)
+            return Result.error(CodeMsg.REQUEST_ILLEGAL);
 
         // 内存标记，减少 redis 访问
         boolean seckillOver = localOverMap.get(goodsId);
@@ -101,7 +132,7 @@ public class SeckillController implements InitializingBean {
 
         // 判断重复秒杀
         SeckillOrder order = orderService.getSeckillOrderByUserIdGoodsId(user.getId(), goodsId);
-        log.info("" + order);
+        log.info(order == null ? "new seckill order" : "seckill repeated");
         if (order != null)
             return Result.error(CodeMsg.SECKILL_REPEATED);
 
@@ -123,9 +154,32 @@ public class SeckillController implements InitializingBean {
         return Result.success(result);
     }
 
+    @RequestMapping(value = "/verifyCode", method = RequestMethod.GET)
+    @ResponseBody
+    public Result<String> getSeckillVerifyCode(HttpServletResponse response, SeckillUser user,
+                                               @RequestParam("goodsId") long goodsId) {
+        if (user == null)
+            return Result.error(CodeMsg.SESSION_ERROR);
+
+        try {
+            BufferedImage image = seckillService.createVerifyCode(user, goodsId);
+            OutputStream out = response.getOutputStream();
+            ImageIO.write(image, "JPEG", out);
+            out.flush();
+            out.close();
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.error(CodeMsg.SECKILL_FAIL);
+        }
+    }
+
+    /**
+     * 重置功能
+     */
     @RequestMapping(value = "/reset", method = RequestMethod.GET)
     @ResponseBody
-    public Result<Boolean> reset(Model model) {
+    public Result<Boolean> reset() {
         List<GoodsVo> goodsList = goodsService.listGoodsVo();
         for (GoodsVo goods : goodsList) {
             goods.setStockCount(10);

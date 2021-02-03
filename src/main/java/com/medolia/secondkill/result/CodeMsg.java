@@ -35,6 +35,7 @@ public class CodeMsg {
     public static CodeMsg SECKILL_REPEATED = new CodeMsg(500501, "不能重复秒杀");
     public static CodeMsg SECKILL_FAIL = new CodeMsg(500502, "秒杀失败");
     public static CodeMsg SECKILL_WAIT = new CodeMsg(500503, "排队中...");
+    public static CodeMsg SECKILL_VERIFY_FAIL = new CodeMsg(500504, "验证码错误或已失效");
 
     private CodeMsg(int code, String msg) {
         this.code = code;

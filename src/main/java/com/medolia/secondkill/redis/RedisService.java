@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.medolia.secondkill.rabbitmq.SeckillMsg;
 import com.medolia.secondkill.redis.key.KeyPrefix;
 import com.medolia.secondkill.redis.key.SeckillUserKey;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
@@ -15,10 +16,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Slf4j
 public class RedisService {
 
-    @Autowired
     JedisPool jedisPool;
+
+    @Autowired
+    public void setJedisPool(JedisPool jedisPool) {
+        this.jedisPool = jedisPool;
+    }
 
     /**
      * 获取值
@@ -199,9 +205,4 @@ public class RedisService {
         if (jedis != null)
             jedis.close();
     }
-
-    /*public static void main(String[] args) {
-        String json = "{\"goodsId\":1,\"user\":{\"id\":18912341241,\"loginCount\":0,\"nickname\":\"18612766141\",\"password\":\"b7797cce01b4b131b433b6acf4add449\",\"registerDate\":1547228183000,\"salt\":\"1a2b3c4d\"}}";
-        SeckillMsg msg = JSON.toJavaObject(JSON.parseObject(json), SeckillMsg.class);
-    }*/
 }
