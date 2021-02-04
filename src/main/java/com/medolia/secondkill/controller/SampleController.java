@@ -1,7 +1,6 @@
 package com.medolia.secondkill.controller;
 
 import com.medolia.secondkill.domain.SeckillUser;
-import com.medolia.secondkill.domain.User;
 import com.medolia.secondkill.rabbitmq.MQSender;
 import com.medolia.secondkill.redis.RedisService;
 import com.medolia.secondkill.redis.key.UserKey;
@@ -18,14 +17,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Slf4j
 @Controller
 @RequestMapping("/demo")
-public class TestController {
+public class SampleController {
 
     SeckillUserService userService;
     RedisService redisService;
     MQSender sender;
 
     @Autowired
-    public TestController(SeckillUserService userService, RedisService redisService, MQSender sender) {
+    public SampleController(SeckillUserService userService, RedisService redisService, MQSender sender) {
         this.userService = userService;
         this.redisService = redisService;
         this.sender = sender;
@@ -63,21 +62,5 @@ public class TestController {
     @ResponseBody
     public Result<String> error() {
         return Result.error(CodeMsg.SESSION_ERROR);
-    }
-
-    @RequestMapping("redis/get")
-    @ResponseBody
-    public Result<User> redisGet() {
-        User user = redisService.get(UserKey.getById, "1", User.class);
-
-        return Result.success(user);
-    }
-
-    @RequestMapping("redis/set")
-    @ResponseBody
-    public Result<Boolean> redisSet() {
-        User user = new User(1L, "nelfmis");
-        redisService.set(UserKey.getById, "1", user); // "UserKey:id1"
-        return Result.success(true);
     }
 }

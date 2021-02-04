@@ -49,7 +49,7 @@ public class AccessInterceptor implements HandlerInterceptor {
             int maxCount = accessLimit.maxCount();
             boolean needLogin = accessLimit.needLogin();
             String key = request.getRequestURI();
-            if (needLogin) {
+            if (needLogin) { // 如果需要登录而用户不存在，返回需要登录的错误信息
                 if (user == null) {
                     render(response, CodeMsg.SESSION_ERROR);
                     return false;

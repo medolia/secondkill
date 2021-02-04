@@ -13,8 +13,7 @@ public class MQConfig {
 
 
     /**
-     * Direct 模式 交换机 Exchange
-     *
+     * Direct 模式 Exchange
      */
     @Bean
     public Queue seckillQueue() {
