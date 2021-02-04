@@ -14,9 +14,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * 生成 压测需要的 token 文件
+ */
 public class UserUtil {
 
-    private static final String TOKEN_PATH = "/Users/lilongbin/Documents/JmeterFiles/tokens.txt";
+    private static final String TOKEN_PATH = "/Documents/JmeterFiles/tokens.txt";
 
     private static void createUser(int count) throws Exception {
         List<SeckillUser> users = new ArrayList<>(count);
@@ -36,7 +39,7 @@ public class UserUtil {
         // 将用户记录插入数据库
         // insertUsersToDB(users);
 
-        // 生成 token
+        // 生成 token，存储于本地文件中
         createToken(count, users);
     }
 
@@ -79,7 +82,7 @@ public class UserUtil {
         }
         raf.close();
 
-        System.out.println(count + " tokens created!");
+        System.out.println(count + " tokens created.");
     }
 
     private static void insertUsersToDB(List<SeckillUser> users) throws Exception {
@@ -99,7 +102,7 @@ public class UserUtil {
         pstmt.executeBatch();
         pstmt.close();
         conn.close();
-        System.out.println("" + users.size() + " users inserted into DB!");
+        System.out.println("" + users.size() + " users inserted into DB.");
     }
 
     public static void main(String[] args) throws Exception {

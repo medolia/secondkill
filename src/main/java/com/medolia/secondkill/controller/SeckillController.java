@@ -73,7 +73,8 @@ public class SeckillController implements InitializingBean {
     }
 
     /**
-     * 生成 path 值需要正确回答验证码问题
+     * 1. 正确回答验证码问题
+     * 2. 生成 path uuid
      */
     @RequestMapping(value = "/path", method = RequestMethod.GET)
     @ResponseBody
@@ -122,7 +123,6 @@ public class SeckillController implements InitializingBean {
         }
 
         // 预减库存
-        // TODO: 单用户重复点击造成库存缓存失效
         long stock = redisService.decr(GoodsKey.getSeckillGoodsStock, "" + goodsId);
         log.info("stock obtained from redis: " + stock);
         if (stock < 0) {
@@ -175,7 +175,7 @@ public class SeckillController implements InitializingBean {
     }
 
     /**
-     * 重置功能
+     * 重置秒杀商品库存
      */
     @RequestMapping(value = "/reset", method = RequestMethod.GET)
     @ResponseBody
