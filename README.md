@@ -18,11 +18,11 @@
 
 | ID | Problem  | Article | 
 | --- | ---   | :--- |
-| 000 | 分布式 session 与接口限流 | [解决思路](/docs/solution.md) |
-| 001 | redis 键设计 | [解决思路](/docs/solution.md) |
-| 002 | 前后端分离 | [解决思路](/docs/solution.md) |
-| 003 | 页面与对象缓存 | [解决思路](/docs/solution.md) |
-| 004 | 隐藏秒杀地址和图形验证码 | [解决思路](/docs/solution.md) |
+| 000 | 分布式 session 与接口限流 | [解决思路](https://www.medolia.zone/2021/02/17/2021-02-17-user-distributed-session-and-access-limit/) |
+| 001 | redis 键设计 | [解决思路](https://www.medolia.zone/2021/02/17/2021-02-17-redis-key-design/) |
+| 002 | 前后端分离 | [解决思路](https://www.medolia.zone/2021/02/17/2021-02-17-decomposition-between-front-end-and-back-end/) |
+| 003 | 页面与对象缓存 | [解决思路](https://www.medolia.zone/2021/02/17/2021-02-17-redis-page-and-instance-cache/) |
+| 004 | 隐藏秒杀地址和图形验证码 | [解决思路](https://www.medolia.zone/2021/02/19/2021-02-19-hide-seckill-address-and-captcha/) |
 
 ## 核心秒杀逻辑
 
