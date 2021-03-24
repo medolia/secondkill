@@ -57,6 +57,17 @@ public class SeckillUserService {
         return user;
     }
 
+    public SeckillUser getByToken(HttpServletResponse response, String token) {
+        if (StringUtils.isEmpty(token)) return null;
+
+        SeckillUser user = redisService.get(SeckillUserKey.token,
+                token, SeckillUser.class);
+        // 缓存更新
+        if (user != null) addCookie(response, token, user);
+
+        return user;
+    }
+
     public boolean updatePassword(String token, long id, String formPass) {
         // 取得用户对象
         SeckillUser user = getById(id);
@@ -73,17 +84,6 @@ public class SeckillUserService {
         user.setPassword(toBeUpdate.getPassword());
         redisService.set(SeckillUserKey.token, token, user); // 更新 token 对象缓存
         return true;
-    }
-
-    public SeckillUser getByToken(HttpServletResponse response, String token) {
-        if (StringUtils.isEmpty(token)) return null;
-
-        SeckillUser user = redisService.get(SeckillUserKey.token,
-                token, SeckillUser.class);
-        // 缓存更新
-        if (user != null) addCookie(response, token, user);
-
-        return user;
     }
 
     public String login(HttpServletResponse response, @Valid LoginVo loginVo) {

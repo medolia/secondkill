@@ -97,7 +97,7 @@ public class SeckillController implements InitializingBean {
      * 1. user 已登录，否则返回 会话期过时
      * 2. path 值核对为真，否则返回 请求非法
      * 2. 内存标记（map 对象）表明商品仍在秒杀，否则返回 秒杀结束
-     * 3. 预减库存（redis 更新值）成功 否则更新对应商品的内存标记，返回 秒杀结束
+     * 3. 访问缓存库存（redis 更新值）是否还有余量 否则更新对应商品的内存标记，返回 秒杀结束
      * 4. 数据库判断未重复下单 否则返回 重复秒杀
      * 5. 将消息发送（direct exchange）至 id 为 "SECKILL_QUEUE" 的消息队列 queue，返回 秒杀等待中
      */
@@ -122,10 +122,10 @@ public class SeckillController implements InitializingBean {
             return Result.error(CodeMsg.SECKILL_OVER);
         }
 
-        // 预减库存
-        long stock = redisService.decr(GoodsKey.getSeckillGoodsStock, "" + goodsId);
+        // 访问缓存中的库存
+        Long stock = redisService.get(GoodsKey.getSeckillGoodsStock, "" + goodsId, Long.class);
         log.info("stock obtained from redis: " + stock);
-        if (stock < 0) {
+        if (stock <= 0) {
             localOverMap.put(goodsId, true);
             return Result.error(CodeMsg.SECKILL_OVER);
         }
@@ -175,23 +175,5 @@ public class SeckillController implements InitializingBean {
             e.printStackTrace();
             return Result.error(CodeMsg.SECKILL_FAIL);
         }
-    }
-
-    /**
-     * 重置秒杀商品库存
-     */
-    @RequestMapping(value = "/reset", method = RequestMethod.GET)
-    @ResponseBody
-    public Result<Boolean> reset() {
-        List<GoodsVo> goodsList = goodsService.listGoodsVo();
-        for (GoodsVo goods : goodsList) {
-            goods.setStockCount(10);
-            redisService.set(GoodsKey.getSeckillGoodsStock, "" + goods.getId(), 10);
-            localOverMap.put(goods.getId(), false);
-        }
-        redisService.delete(OrderKey.getSeckillOrderByUidGid);
-        redisService.delete(SeckillKey.seckillOver);
-        seckillService.reset(goodsList);
-        return Result.success(true);
     }
 }

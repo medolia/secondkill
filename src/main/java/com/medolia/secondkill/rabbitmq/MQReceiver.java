@@ -3,6 +3,7 @@ package com.medolia.secondkill.rabbitmq;
 import com.medolia.secondkill.domain.SeckillOrder;
 import com.medolia.secondkill.domain.SeckillUser;
 import com.medolia.secondkill.redis.RedisService;
+import com.medolia.secondkill.redis.key.GoodsKey;
 import com.medolia.secondkill.service.GoodsService;
 import com.medolia.secondkill.service.OrderService;
 import com.medolia.secondkill.service.SeckillService;
@@ -53,7 +54,14 @@ public class MQReceiver {
         if (order != null) return;
 
         // 减库存 下订单 写入秒杀订单
-        seckillService.seckill(user, goods);
+        try {
+            seckillService.seckill(user, goods);
+            log.info("数据库减库存成功，现在更新对应缓存。");
+            Long redisStock = redisService.decr(GoodsKey.getSeckillGoodsStock, "" + goods.getId());
+            log.info("缓存减库存成功，剩余库存为 {} ", redisStock);
+        } catch (Exception e) {
+            log.info("执行秒杀订单过程出现错误：{}", e.getMessage());
+        }
     }
 
     @RabbitListener(queues = MQConfig.TEST_QUEUE)

@@ -102,7 +102,6 @@ public class RedisService {
         List<String> keys = scanKeys(prefix.getPrefix());
         if (keys == null || keys.size() <= 0)
             return true;
-
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();
@@ -187,9 +186,11 @@ public class RedisService {
 
     @SuppressWarnings("unchecked")
     public static <T> T stringToBean(String str, Class<T> clazz) {
+        // 判断是否为空
         if (str == null || str.length() <= 0 || clazz == null)
             return null;
 
+        // 判断整型、字符串（有可能是已经缓存的页面）
         if (clazz == int.class || clazz == Integer.class)
             return (T) Integer.valueOf(str);
         else if (clazz == long.class || clazz == Long.class)

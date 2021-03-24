@@ -4,10 +4,12 @@ import com.medolia.secondkill.domain.OrderInfo;
 import com.medolia.secondkill.domain.SeckillOrder;
 import com.medolia.secondkill.domain.SeckillUser;
 import com.medolia.secondkill.redis.RedisService;
+import com.medolia.secondkill.redis.key.GoodsKey;
 import com.medolia.secondkill.redis.key.SeckillKey;
 import com.medolia.secondkill.util.MD5Util;
 import com.medolia.secondkill.util.UUIDUtil;
 import com.medolia.secondkill.vo.GoodsVo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +22,7 @@ import java.util.List;
 import java.util.Random;
 
 @Service
+@Slf4j
 public class SeckillService {
 
     GoodsService goodsService;
@@ -37,8 +40,9 @@ public class SeckillService {
     @Transactional
     public OrderInfo seckill(SeckillUser user, GoodsVo goods) {
         boolean success = goodsService.reduceStock(goods); // 减库存
-        if (success)
+        if (success) {
             return orderService.createOrder(user, goods);
+        }
         else {
             setSeckillOver(goods.getId());
             return null;

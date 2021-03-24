@@ -15,7 +15,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * 生成 压测需要的 token 文件
+ * 生成 压测需要的 token 文件，存入 redis
  */
 public class UserUtil {
 
