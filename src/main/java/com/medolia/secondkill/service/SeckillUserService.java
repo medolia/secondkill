@@ -68,7 +68,7 @@ public class SeckillUserService {
         return user;
     }
 
-    public boolean updatePassword(String token, long id, String formPass) {
+    public boolean updatePassword(String token, long id, String formPass) throws GlobalException {
         // 取得用户对象
         SeckillUser user = getById(id);
         if (user == null) throw new GlobalException(CodeMsg.MOBILE_NOT_EXIST);
@@ -86,7 +86,7 @@ public class SeckillUserService {
         return true;
     }
 
-    public String login(HttpServletResponse response, @Valid LoginVo loginVo) {
+    public String login(HttpServletResponse response, @Valid LoginVo loginVo) throws GlobalException {
         if (loginVo == null)
             throw new GlobalException(CodeMsg.SERVER_ERROR);
         String mobile = loginVo.getMobile();

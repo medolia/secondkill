@@ -33,7 +33,7 @@ public class MQReceiver {
 
     /**
      * 消费队列逻辑解释（对应未集成 rabbitMQ 前的秒杀逻辑）
-     * 1. 数据库判断是否库存为空 ？ yes ：提前返回（消息处理结束） no ：跳转至 2
+     * 1. 数据库判断是否库存是否还有余量 ？ yes ：提前返回（消息处理结束） no ：跳转至 2
      * 2. 数据库判断是否重复下单 ？ yes ：提前返回 no ：跳转至 3
      * 3. 事务操作：减库存，下订单，写入秒杀订单
      */
@@ -54,13 +54,14 @@ public class MQReceiver {
         if (order != null) return;
 
         // 减库存 下订单 写入秒杀订单
+        // 先数据库减库存，再减 redis 库存
         try {
             seckillService.seckill(user, goods);
             log.info("数据库减库存成功，现在更新对应缓存。");
             Long redisStock = redisService.decr(GoodsKey.getSeckillGoodsStock, "" + goods.getId());
             log.info("缓存减库存成功，剩余库存为 {} ", redisStock);
         } catch (Exception e) {
-            log.info("执行秒杀订单过程出现错误：{}", e.getMessage());
+            log.info("执行秒杀订单过程中出现错误：{}", e.getMessage());
         }
     }
 

@@ -2,7 +2,7 @@ package com.medolia.secondkill.exception;
 
 import com.medolia.secondkill.result.CodeMsg;
 
-public class GlobalException extends RuntimeException {
+public class GlobalException extends Exception {
 
     private static final long serialVersionUID = 1L;
 

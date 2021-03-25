@@ -1,5 +1,6 @@
 package com.medolia.secondkill.controller;
 
+import com.medolia.secondkill.exception.GlobalException;
 import com.medolia.secondkill.redis.RedisService;
 import com.medolia.secondkill.result.Result;
 import com.medolia.secondkill.service.SeckillUserService;
@@ -35,7 +36,7 @@ public class LoginController {
 
     @RequestMapping("/do_login")
     @ResponseBody
-    public Result<String> doLogin(HttpServletResponse response, @Valid LoginVo loginVo) {
+    public Result<String> doLogin(HttpServletResponse response, @Valid LoginVo loginVo) throws GlobalException {
         String token = userService.login(response, loginVo);
         return Result.success(token);
     }
